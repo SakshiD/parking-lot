@@ -21,12 +21,7 @@ public class ParkingLotTest {
     void setUp() {
         membersToNotify = mock(MembersToNotify.class);
     }
-    //    @Test
-//    public void shouldNotifyWhenParkingIsFull() {
-//        Car car = new Car();
-//        ParkingLot parkingLot = new ParkingLot(1, Set.of(car), List.of(mock(MembersToNotify.class)));
-//        verify(membersToNotify, times(1)).notifyFull(Mockito.any());
-//    }
+
     @Test
     public void shouldReturnTrueIfCarIsParkedSuccessfully() throws ParkingLotException {
         Car car = new Car();
@@ -83,5 +78,19 @@ public class ParkingLotTest {
         assertFalse(parkingLot.isParked(car2));
     }
 
+    @Test
+    public void shouldNotifyWhenParkingIsFull() throws ParkingLotException {
+        Car car = new Car();
+        ParkingLot parkingLot = new ParkingLot(1, Set.of(car), List.of(membersToNotify));
+        parkingLot.parkCar(car, parkingLot);
+        verify(membersToNotify, times(1)).notifyFull(Mockito.any());
+    }
 
+    @Test
+    public void shouldNotifyWhenParkingIsAvailable() throws ParkingLotException {
+        Car car = new Car();
+        ParkingLot parkingLot = new ParkingLot(0, Set.of(car), List.of(membersToNotify));
+        parkingLot.unParkCar(car, parkingLot);
+        verify(membersToNotify, times(1)).notifyAvailable(Mockito.any());
+    }
 }
