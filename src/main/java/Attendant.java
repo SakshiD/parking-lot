@@ -2,23 +2,24 @@ import java.util.List;
 
 public class Attendant {
     private List<ParkingLot> availableParkingLots;
-
-    public Attendant(List<ParkingLot> availableParkingLots) {
+    private ParkingLotSelector parkingLotSelector;
+    public Attendant(List<ParkingLot> availableParkingLots, ParkingLotSelector parkingLotSelector) {
         this.availableParkingLots = availableParkingLots;
+        this.parkingLotSelector=parkingLotSelector;
     }
 
     public boolean parkByAttendant(Car car) throws CarAlreadyParkedException, ParkingLotFullException {
+
         boolean carParked = false;
         long carIsAlreadyParked = availableParkingLots.stream().filter(a -> a.isParked(car)).count();
         if (carIsAlreadyParked > 0) {
             throw new ParkingLotFullException("Car is already parked !");
         }
-        for (ParkingLot availableParkingLot : availableParkingLots) {
-            try {
-                carParked = availableParkingLot.parkCar(car);
-            } catch (ParkingLotFullException e) {
-                System.out.println("Parking lot " + availableParkingLot + " is full !");
-            }
+        ParkingLot availableParkingLot = this.parkingLotSelector.selectParkingLotAccordingToScheme(availableParkingLots);
+        try {
+            carParked = availableParkingLot.parkCar(car);
+        } catch (ParkingLotFullException e) {
+            System.out.println("Parking lot " + availableParkingLot + " is full !");
         }
         return carParked;
     }
