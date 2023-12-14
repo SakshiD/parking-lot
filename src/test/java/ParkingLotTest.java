@@ -3,7 +3,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
-import java.util.Observer;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,43 +22,46 @@ public class ParkingLotTest {
     }
 
     @Test
-    public void shouldReturnTrueIfCarIsParkedSuccessfully() throws ParkingLotException {
+    public void shouldReturnTrueIfCarIsParkedSuccessfully() throws CarAlreadyParkedException, ParkingLotFullException {
         Car car = new Car();
-        ParkingLot parkingLot = new ParkingLot(10, Set.of(car), List.of(mock(MembersToNotify.class)));
-        assertTrue(parkingLot.parkCar(car, parkingLot));
+        ParkingLot parkingLot = new ParkingLot(10, Set.of(), List.of(mock(MembersToNotify.class)));
+        assertTrue(parkingLot.parkCar(car));
     }
 
 
     @Test
     public void shouldReturnFalseWhen0Capacity() {
-        Car car = new Car();
-        ParkingLot parkingLot = new ParkingLot(0, Set.of(car), List.of(mock(MembersToNotify.class)));
-        assertThrows(ParkingLotException.class,() -> parkingLot.parkCar(car, parkingLot));
+        Car car1 = new Car();
+        Car car2 = new Car();
+        ParkingLot parkingLot = new ParkingLot(0, Set.of(), List.of(mock(MembersToNotify.class)));
+        assertThrows(ParkingLotFullException.class,() -> parkingLot.parkCar(car2));
     }
 
     @Test
-    public void shouldReturnFalseWhen1Capacity() throws ParkingLotException {
+    public void shouldReturnFalseWhen1Capacity() throws CarAlreadyParkedException, ParkingLotFullException {
         Car car1 = new Car();
         Car car2 = new Car();
+        Car car3 = new Car();
 
         ParkingLot parkingLot = new ParkingLot(1, Set.of(car1), List.of(mock(MembersToNotify.class)));
 
-        assertTrue(parkingLot.parkCar(car1, parkingLot));
-        assertThrows(ParkingLotException.class,() -> parkingLot.parkCar(car2, parkingLot));
+        assertTrue(parkingLot.parkCar(car2));
+        assertThrows(ParkingLotFullException.class,() -> parkingLot.parkCar(car3));
     }
 
     @Test
-    public void shouldReturnTrueWhenCarIsUnparked() throws ParkingLotException {
+    public void shouldReturnTrueWhenCarIsUnparked() throws ParkingLotException, CarNotParkedException {
         Car car = new Car();
         ParkingLot parkingLot = new ParkingLot(10, Set.of(car), List.of(mock(MembersToNotify.class)));
-        assertTrue(parkingLot.unParkCar(car, parkingLot));
+        assertTrue(parkingLot.unParkCar(car));
     }
 
     @Test
-    public void shouldThrowErrorWhenNoCapacity() throws ParkingLotException {
-        Car car = new Car();
-        ParkingLot parkingLot = new ParkingLot(-1, Set.of(car), List.of(mock(MembersToNotify.class)));
-        assertThrows(ParkingLotException.class,() -> parkingLot.unParkCar(car, parkingLot));
+    public void shouldThrowErrorWhenNoCapacity()  {
+        Car car1 = new Car();
+        Car car2 = new Car();
+        ParkingLot parkingLot = new ParkingLot(-1, Set.of(car1), List.of(mock(MembersToNotify.class)));
+        assertThrows(CarNotParkedException.class,() -> parkingLot.unParkCar(car2));
     }
 
 
@@ -71,7 +73,7 @@ public class ParkingLotTest {
     }
 
     @Test
-    public void shouldReturnFalseWhenTheCarIsNotParked() throws ParkingLotException {
+    public void shouldReturnFalseWhenTheCarIsNotParked() throws CarAlreadyParkedException {
         Car car1 = new Car();
         Car car2 = new Car();
         ParkingLot parkingLot = new ParkingLot(10, Set.of(car1), List.of(mock(MembersToNotify.class)));
@@ -79,18 +81,18 @@ public class ParkingLotTest {
     }
 
     @Test
-    public void shouldNotifyWhenParkingIsFull() throws ParkingLotException {
+    public void shouldNotifyWhenParkingIsFull() throws CarAlreadyParkedException, ParkingLotFullException {
         Car car = new Car();
-        ParkingLot parkingLot = new ParkingLot(1, Set.of(car), List.of(membersToNotify));
-        parkingLot.parkCar(car, parkingLot);
+        ParkingLot parkingLot = new ParkingLot(1, Set.of(), List.of(membersToNotify));
+        parkingLot.parkCar(car);
         verify(membersToNotify, times(1)).notifyFull(Mockito.any());
     }
 
     @Test
-    public void shouldNotifyWhenParkingIsAvailable() throws ParkingLotException {
+    public void shouldNotifyWhenParkingIsAvailable() throws ParkingLotException, CarNotParkedException {
         Car car = new Car();
         ParkingLot parkingLot = new ParkingLot(0, Set.of(car), List.of(membersToNotify));
-        parkingLot.unParkCar(car, parkingLot);
+        parkingLot.unParkCar(car);
         verify(membersToNotify, times(1)).notifyAvailable(Mockito.any());
     }
 }

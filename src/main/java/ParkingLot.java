@@ -24,31 +24,37 @@ public class ParkingLot {
         this.capacity = capacity;
     }
 
-    public boolean parkCar(Car car, ParkingLot parkingLot) throws ParkingLotException {
-        int parkingCapacity = parkingLot.getCapacity();
+    public boolean parkCar(Car car) throws CarAlreadyParkedException, ParkingLotFullException {
+        if (this.isParked(car)) {
+            throw new CarAlreadyParkedException("Car is already parked in this parking lot!");
+        }
+        int parkingCapacity = this.getCapacity();
         if (parkingCapacity <= 0) {
-            throw new ParkingLotException("Parking full !");
+            throw new ParkingLotFullException("Parking full !");
         }
         parkingCapacity--;
-        parkingLot.setCapacity(parkingCapacity);
+        this.setCapacity(parkingCapacity);
         if(parkingCapacity == 0){
-        for(MembersToNotify member : parkingLot.membersToNotifyList) {
-            member.notifyFull(parkingLot);
+        for(MembersToNotify member : this.membersToNotifyList) {
+            member.notifyFull(this);
         }
         }
         return true;
     }
 
-    public boolean unParkCar(Car car, ParkingLot parkingLot) throws ParkingLotException {
-        int parkingCapacity = parkingLot.getCapacity();
+    public boolean unParkCar(Car car) throws ParkingLotException, CarNotParkedException {
+        if (!this.isParked(car)) {
+            throw new CarNotParkedException("Car is NOT parked in this parking lot!");
+        }
+        int parkingCapacity = this.getCapacity();
         if (parkingCapacity <= -1) {
             throw new ParkingLotException("Parking empty !");
         }
         parkingCapacity++;
-        parkingLot.setCapacity(parkingCapacity);
+        this.setCapacity(parkingCapacity);
         if(parkingCapacity == 1){
-            for(MembersToNotify member : parkingLot.membersToNotifyList) {
-                member.notifyAvailable(parkingLot);
+            for(MembersToNotify member : this.membersToNotifyList) {
+                member.notifyAvailable(this);
             }
         }
         return true;
